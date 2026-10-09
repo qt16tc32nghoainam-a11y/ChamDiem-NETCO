@@ -98,3 +98,6 @@ with check (true);
 
 -- Không mở quyền sửa/xóa công khai để tránh mất dữ liệu cuộc thi.
 -- Nếu cần xóa phiếu, thực hiện trong Supabase Dashboard > Table Editor.
+
+-- Bắt PostgREST tải lại schema ngay sau khi thêm judge_id.
+select pg_notify('pgrst', 'reload schema');

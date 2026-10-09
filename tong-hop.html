@@ -45,6 +45,13 @@
 
   .count-pill{font-size:13px;color:var(--muted);font-weight:600;}
   .count-pill b{color:var(--ink);}
+  .filter-card{background:#fff;border:1px solid rgba(0,0,0,.04);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;margin-top:16px;display:flex;align-items:end;gap:12px;flex-wrap:wrap;}
+  .filter-field{display:flex;flex-direction:column;gap:5px;min-width:155px;}
+  .filter-field label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--muted);}
+  .filter-field input{padding:10px 11px;border:1.5px solid var(--line);border-radius:10px;font:inherit;color:var(--ink);background:#fcfcfc;}
+  .filter-field input:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(185,28,28,.1);}
+  .filter-actions{display:flex;gap:8px;}
+  .filter-note{font-size:12px;color:var(--muted);margin-left:auto;}
 
   /* Podium */
   .podium{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px;}
@@ -108,6 +115,22 @@
     <button class="btn primary" id="pdfBtn">⬇ Tải PDF kết quả</button>
   </div>
 
+  <div class="filter-card">
+    <div class="filter-field">
+      <label for="fromDate">Từ ngày</label>
+      <input type="date" id="fromDate" />
+    </div>
+    <div class="filter-field">
+      <label for="toDate">Đến ngày</label>
+      <input type="date" id="toDate" />
+    </div>
+    <div class="filter-actions">
+      <button class="btn primary" id="applyFilter">Lọc kết quả</button>
+      <button class="btn" id="resetFilter">Đặt lại</button>
+    </div>
+    <div class="filter-note">Lọc theo ngày chấm trên phiếu</div>
+  </div>
+
   <div id="content"></div>
 
   <footer>Kết quả tính theo điểm trung bình của tất cả Ban Giám Khảo đã submit</footer>
@@ -122,24 +145,41 @@ const TEAMS = [
 ];
 const CRIT = ['Hương vị','Dinh dưỡng','Trình bày','Thuyết trình','Vệ sinh'];
 const KEY = 'chamdiem_submissions';
+const dateFilter = { from: '', to: '' };
+
+function filterData(data){
+  return data.filter(item => {
+    const date = item.date || '';
+    if(dateFilter.from && date < dateFilter.from) return false;
+    if(dateFilter.to && date > dateFilter.to) return false;
+    return true;
+  });
+}
 
 async function load(){ return window.NETCO_DB.list(); }
 
 async function render(){
+  let allData;
   let data;
   try {
-    data = await load();
+    allData = await load();
+    data = filterData(allData);
   } catch (error) {
     document.getElementById('countPill').textContent = 'Lỗi tải dữ liệu';
     document.getElementById('content').innerHTML = `<div class="card"><div class="empty">⚠️ Không tải được dữ liệu chung.<br><small>${error.message}</small></div></div>`;
     return;
   }
   const content = document.getElementById('content');
-  document.getElementById('countPill').innerHTML = `Đã nhận <b>${data.length}</b> phiếu chấm`;
+  document.getElementById('countPill').innerHTML = dateFilter.from || dateFilter.to
+    ? `Đã lọc <b>${data.length}</b> / ${allData.length} phiếu chấm`
+    : `Đã nhận <b>${data.length}</b> phiếu chấm`;
 
   if(data.length === 0){
+    const emptyText = dateFilter.from || dateFilter.to
+      ? 'Không có phiếu chấm trong khoảng ngày đã chọn.'
+      : 'Chưa có phiếu chấm nào.';
     content.innerHTML = `<div class="card"><div class="empty"><div class="big">🍲</div>
-      Chưa có phiếu chấm nào.<br>Hãy mở <b>phiếu chấm</b>, chấm điểm và submit để dữ liệu hiện ở đây.
+      ${emptyText}<br>${dateFilter.from || dateFilter.to ? 'Hãy đổi khoảng ngày để xem dữ liệu khác.' : 'Hãy mở <b>phiếu chấm</b>, chấm điểm và submit để dữ liệu hiện ở đây.'}
       <div style="margin-top:16px"><a class="btn primary" href="index.html">Mở phiếu chấm →</a></div></div></div>`;
     return;
   }
@@ -187,13 +227,13 @@ async function render(){
   tbody += '</tbody>';
 
   // Raw submissions
-  let rawRows = data.map((d,idx) => `
+  let rawRows = data.map(d => `
     <tr>
       <td>${d.judge||'—'}</td>
       <td class="team-tag">${d.team||'—'}</td>
       ${d.scores.map(s=>`<td class="num">${s.value}</td>`).join('')}
       <td class="num avg-cell">${d.total}</td>
-      <td class="num"><button class="del-btn" data-idx="${idx}" title="Xóa phiếu này">✕</button></td>
+      <td class="num"><button class="del-btn" data-idx="${allData.indexOf(d)}" title="Xóa phiếu này">✕</button></td>
     </tr>`).join('');
 
   content.innerHTML = `
@@ -237,7 +277,7 @@ document.getElementById('clearBtn').onclick = async () => {
 document.getElementById('printBtn').onclick = () => window.print();
 
 document.getElementById('exportCsvBtn').onclick = async () => {
-  const data = await load();
+  const data = filterData(await load());
   if(!data.length){ alert('Chưa có dữ liệu để xuất.'); return; }
   let csv = '\uFEFF'; // BOM for Excel UTF-8
   csv += 'BGK,Doi thi,Ngay cham,'+CRIT.join(',')+',Tong,Nhan xet\n';
@@ -332,7 +372,7 @@ function buildResultHTML(ranked){
 }
 
 async function getRanked(){
-  const data = await load();
+  const data = filterData(await load());
   const agg = TEAMS.map(t => {
     const subs = data.filter(d => d.team === t.name);
     const totals = subs.map(s => s.total);
@@ -369,8 +409,28 @@ document.getElementById('pdfBtn').onclick = async () => {
   }finally{ btn.textContent=old; btn.disabled=false; }
 };
 
+document.getElementById('applyFilter').onclick = async () => {
+  const from = document.getElementById('fromDate').value;
+  const to = document.getElementById('toDate').value;
+  if(from && to && from > to){
+    alert('Ngày bắt đầu không được lớn hơn ngày kết thúc.');
+    return;
+  }
+  dateFilter.from = from;
+  dateFilter.to = to;
+  await render();
+};
+
+document.getElementById('resetFilter').onclick = async () => {
+  dateFilter.from = '';
+  dateFilter.to = '';
+  document.getElementById('fromDate').value = '';
+  document.getElementById('toDate').value = '';
+  await render();
+};
+
 render();
-window.addEventListener('focus', render); // refresh when coming back from scoring page
+window.addEventListener('focus', () => render()); // refresh when coming back from scoring page
 </script>
 </body>
 </html>
