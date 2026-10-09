@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#b91c1c" />
+<title>Tổng Hợp Kết Quả - Hội Thi Nấu Ăn</title>
+<script src="vendor/html2canvas.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --red:#b91c1c;--red-dark:#7f1d1d;--red-soft:#fef2f2;--gold:#d4af37;
+    --ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--bg:#f4f1ea;--card:#fff;
+    --gold-bg:#fdf6e3;--silver-bg:#f1f5f9;--bronze-bg:#fdf2ec;
+    --shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(127,29,29,.08);--radius:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+    background:radial-gradient(1200px 500px at 50% -200px,rgba(185,28,28,.12),transparent 60%),var(--bg);
+    color:var(--ink);line-height:1.5;padding:0 0 60px;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:16px;}
+  header.sheet-head{
+    background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;border-radius:var(--radius);
+    padding:20px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-top:14px;text-align:center;
+  }
+  header.sheet-head::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(212,175,55,.35),transparent 70%);}
+  .union{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.95;}
+  .title-main{font-size:28px;font-weight:800;margin:12px 0 4px;position:relative;z-index:1;}
+  .title-sub{font-size:14.5px;font-style:italic;opacity:.95;position:relative;z-index:1;}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px;}
+  .toolbar .spacer{flex:1;}
+  .btn{
+    padding:11px 18px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:1.5px solid var(--line);
+    background:#fff;color:var(--ink);font-family:inherit;transition:.15s;text-decoration:none;display:inline-flex;align-items:center;gap:7px;
+  }
+  .btn:hover{filter:brightness(.97);border-color:var(--red);}
+  .btn.primary{background:var(--red);color:#fff;border-color:var(--red);}
+  .btn.ghost-red{color:var(--red);border-color:rgba(185,28,28,.3);}
+
+  .count-pill{font-size:13px;color:var(--muted);font-weight:600;}
+  .count-pill b{color:var(--ink);}
+
+  /* Podium */
+  .podium{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px;}
+  @media(max-width:720px){.podium{grid-template-columns:1fr 1fr;}}
+  .rank-card{
+    background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);
+    border:1.5px solid rgba(0,0,0,.03);position:relative;overflow:hidden;
+  }
+  .rank-card.r1{background:var(--gold-bg);border-color:rgba(212,175,55,.4);}
+  .rank-card.r2{background:var(--silver-bg);}
+  .rank-card.r3{background:var(--bronze-bg);}
+  .medal{font-size:26px;}
+  .rank-pos{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:4px;}
+  .rank-team{font-size:15px;font-weight:800;margin:6px 0 2px;min-height:40px;}
+  .rank-avg{font-size:32px;font-weight:800;color:var(--red);font-variant-numeric:tabular-nums;}
+  .rank-avg small{font-size:14px;color:var(--muted);font-weight:600;}
+  .rank-meta{font-size:11.5px;color:var(--muted);margin-top:4px;}
+
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-top:16px;border:1px solid rgba(0,0,0,.03);}
+  .section-label{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:14px;}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th,td{padding:11px 10px;text-align:left;border-bottom:1px solid var(--line);}
+  th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:800;}
+  td.num,th.num{text-align:center;font-variant-numeric:tabular-nums;}
+  tr:hover td{background:#fafafa;}
+  .team-tag{font-weight:700;}
+  .badge-sm{display:inline-flex;width:26px;height:26px;border-radius:8px;background:var(--red-soft);color:var(--red);align-items:center;justify-content:center;font-weight:800;font-size:13px;margin-right:8px;}
+  .avg-cell{font-weight:800;color:var(--red);}
+  .del-btn{background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:16px;padding:4px;border-radius:6px;}
+  .del-btn:hover{color:var(--red);background:var(--red-soft);}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty .big{font-size:46px;margin-bottom:10px;}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px;}
+
+  @media print{
+    body{background:#fff;padding:0;}
+    .toolbar,.del-btn,footer{display:none!important;}
+    .card,.rank-card,header.sheet-head{box-shadow:none;}
+    header.sheet-head{background:#fff!important;color:#000!important;border:2px solid var(--red);}
+    header.sheet-head .union,.title-main,.title-sub{color:#000!important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="sheet-head">
+    <div class="union">Công đoàn Công ty Cổ phần Bột giặt NET</div>
+    <div class="title-main">TỔNG HỢP KẾT QUẢ CHẤM ĐIỂM</div>
+    <div class="title-sub">Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần · 20/10/2026</div>
+  </header>
+
+  <div class="toolbar">
+    <a class="btn" href="index.html">← Về phiếu chấm</a>
+    <span class="count-pill" id="countPill"></span>
+    <span class="spacer"></span>
+    <button class="btn ghost-red" id="clearBtn">🗑 Xóa toàn bộ dữ liệu</button>
+    <button class="btn" id="exportCsvBtn">⬇ Xuất CSV</button>
+    <button class="btn" id="printBtn">🖨 In</button>
+    <button class="btn primary" id="pdfBtn">⬇ Tải PDF kết quả</button>
+  </div>
+
+  <div id="content"></div>
+
+  <footer>Kết quả tính theo điểm trung bình của tất cả Ban Giám Khảo đã submit</footer>
+</div>
+
+<script>
+const TEAMS = [
+  {letter:'A', name:'CĐBP Khối Văn phòng'},
+  {letter:'B', name:'CĐBP Xưởng Bột giặt'},
+  {letter:'C', name:'CĐBP Xưởng Tẩy Rửa Lỏng'},
+  {letter:'D', name:'CĐBP Kho vận'},
+];
+const CRIT = ['Hương vị','Dinh dưỡng','Trình bày','Thuyết trình','Vệ sinh'];
+const KEY = 'chamdiem_submissions';
+
+function load(){ return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+function save(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
+
+function render(){
+  const data = load();
+  const content = document.getElementById('content');
+  document.getElementById('countPill').innerHTML = `Đã nhận <b>${data.length}</b> phiếu chấm`;
+
+  if(data.length === 0){
+    content.innerHTML = `<div class="card"><div class="empty"><div class="big">🍲</div>
+      Chưa có phiếu chấm nào.<br>Hãy mở <b>phiếu chấm</b>, chấm điểm và submit để dữ liệu hiện ở đây.
+      <div style="margin-top:16px"><a class="btn primary" href="index.html">Mở phiếu chấm →</a></div></div></div>`;
+    return;
+  }
+
+  // Aggregate per team
+  const agg = TEAMS.map(t => {
+    const subs = data.filter(d => d.team === t.name);
+    const totals = subs.map(s => s.total);
+    const avg = totals.length ? totals.reduce((a,b)=>a+b,0)/totals.length : 0;
+    // per-criteria average
+    const critAvg = [0,0,0,0,0].map((_,i) => {
+      if(!subs.length) return 0;
+      return subs.reduce((a,s)=>a+(s.scores[i]?s.scores[i].value:0),0)/subs.length;
+    });
+    return {team:t, count:subs.length, avg, totals, critAvg};
+  });
+
+  const ranked = agg.filter(a=>a.count>0).sort((a,b)=>b.avg-a.avg);
+  const medals = ['🥇','🥈','🥉',''];
+  const posTxt = ['Giải Nhất','Giải Nhì','Giải Ba','Hạng 4'];
+
+  // Podium
+  let podium = '<div class="podium">';
+  ranked.forEach((a,i) => {
+    podium += `<div class="rank-card r${i+1}">
+      <div class="medal">${medals[i]||'🍚'}</div>
+      <div class="rank-pos">${posTxt[i]||('Hạng '+(i+1))}</div>
+      <div class="rank-team">${a.team.name}</div>
+      <div class="rank-avg">${a.avg.toFixed(1)}<small>/100</small></div>
+      <div class="rank-meta">${a.count} phiếu chấm</div>
+    </div>`;
+  });
+  podium += '</div>';
+
+  // Detail table: team averages per criteria
+  let maxRow = `<thead><tr><th>Đội thi</th>`;
+  CRIT.forEach(c => maxRow += `<th class="num">${c}</th>`);
+  maxRow += `<th class="num">TB /100</th><th class="num">Số phiếu</th></tr></thead>`;
+  let tbody = '<tbody>';
+  ranked.forEach(a => {
+    tbody += `<tr><td class="team-tag"><span class="badge-sm">${a.team.letter}</span>${a.team.name}</td>`;
+    a.critAvg.forEach(v => tbody += `<td class="num">${v.toFixed(1)}</td>`);
+    tbody += `<td class="num avg-cell">${a.avg.toFixed(1)}</td><td class="num">${a.count}</td></tr>`;
+  });
+  tbody += '</tbody>';
+
+  // Raw submissions
+  let rawRows = data.map((d,idx) => `
+    <tr>
+      <td>${d.judge||'—'}</td>
+      <td class="team-tag">${d.team||'—'}</td>
+      ${d.scores.map(s=>`<td class="num">${s.value}</td>`).join('')}
+      <td class="num avg-cell">${d.total}</td>
+      <td class="num"><button class="del-btn" data-idx="${idx}" title="Xóa phiếu này">✕</button></td>
+    </tr>`).join('');
+
+  content.innerHTML = `
+    ${podium}
+    <div class="card">
+      <div class="section-label">Bảng điểm trung bình theo tiêu chí</div>
+      <div style="overflow-x:auto"><table>${maxRow}${tbody}</table></div>
+    </div>
+    <div class="card">
+      <div class="section-label">Chi tiết các phiếu đã submit (${data.length})</div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>BGK</th><th>Đội</th>${CRIT.map(c=>`<th class="num">${c}</th>`).join('')}<th class="num">Tổng</th><th></th></tr></thead>
+        <tbody>${rawRows}</tbody>
+      </table></div>
+    </div>`;
+
+  // Delete handlers
+  content.querySelectorAll('.del-btn').forEach(b => {
+    b.onclick = () => {
+      if(!confirm('Xóa phiếu chấm này?')) return;
+      const arr = load();
+      arr.splice(Number(b.dataset.idx),1);
+      save(arr);
+      render();
+    };
+  });
+}
+
+document.getElementById('clearBtn').onclick = () => {
+  if(!confirm('Xóa TOÀN BỘ phiếu chấm đã lưu? Không thể hoàn tác.')) return;
+  localStorage.removeItem(KEY);
+  render();
+};
+
+document.getElementById('printBtn').onclick = () => window.print();
+
+document.getElementById('exportCsvBtn').onclick = () => {
+  const data = load();
+  if(!data.length){ alert('Chưa có dữ liệu để xuất.'); return; }
+  let csv = '\uFEFF'; // BOM for Excel UTF-8
+  csv += 'BGK,Doi thi,Ngay cham,'+CRIT.join(',')+',Tong,Nhan xet\n';
+  data.forEach(d => {
+    const row = [
+      q(d.judge), q(d.team), q(d.date),
+      ...d.scores.map(s=>s.value),
+      d.total, q(d.comment||'')
+    ];
+    csv += row.join(',') + '\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'TongHop_ChamDiem_HoiThiNauAn.csv';
+  a.click();
+};
+function q(s){ s=String(s==null?'':s).replace(/"/g,'""'); return /[",\n]/.test(s)?`"${s}"`:s; }
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildResultHTML(ranked){
+  const medals = ['🥇','🥈','🥉','🍚'];
+  const posTxt = ['Giải Nhất','Giải Nhì','Giải Ba','Hạng 4'];
+  const podiumRows = ranked.map((a,i)=>`
+    <tr style="border-bottom:1px solid #f0f0f0;">
+      <td style="padding:13px 10px;text-align:center;font-size:20px;">${medals[i]||''}</td>
+      <td style="padding:13px 10px;font-weight:800;color:${i===0?'#b45309':'#1f2937'};">${posTxt[i]||('Hạng '+(i+1))}</td>
+      <td style="padding:13px 10px;font-weight:600;">${esc(a.team.name)}</td>
+      <td style="padding:13px 10px;text-align:center;color:#6b7280;">${a.count}</td>
+      <td style="padding:13px 10px;text-align:center;font-weight:800;font-size:19px;color:#b91c1c;">${a.avg.toFixed(1)}<span style="font-size:11px;color:#9ca3af;">/100</span></td>
+    </tr>`).join('');
+  const critHead = CRIT.map(c=>`<th style="padding:9px 6px;text-align:center;font-size:11px;color:#b91c1c;">${c}</th>`).join('');
+  const critRows = ranked.map(a=>`
+    <tr style="border-bottom:1px solid #f0f0f0;">
+      <td style="padding:10px 8px;font-weight:600;">${esc(a.team.name)}</td>
+      ${a.critAvg.map(v=>`<td style="padding:10px 6px;text-align:center;color:#374151;">${v.toFixed(1)}</td>`).join('')}
+      <td style="padding:10px 6px;text-align:center;font-weight:800;color:#b91c1c;">${a.avg.toFixed(1)}</td>
+    </tr>`).join('');
+  const today = new Date();
+  const dstr = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+  return `
+  <div id="pdfResult" style="width:794px;background:#fff;font-family:'Segoe UI',Arial,sans-serif;color:#1f2937;position:fixed;left:-9999px;top:0;">
+    <div style="border:3px solid #b91c1c;border-radius:14px;overflow:hidden;margin:34px;">
+      <div style="background:linear-gradient(135deg,#b91c1c,#7f1d1d);color:#fff;padding:26px 30px;text-align:center;">
+        <div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.95;">Công đoàn Công ty Cổ phần Bột giặt NET</div>
+        <div style="width:60px;height:3px;background:#d4af37;margin:12px auto;border-radius:3px;"></div>
+        <div style="font-size:30px;font-weight:800;">BIÊN BẢN TỔNG HỢP KẾT QUẢ</div>
+        <div style="font-size:15px;font-style:italic;margin-top:4px;opacity:.95;">Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần · 20/10/2026</div>
+      </div>
+      <div style="padding:26px 30px;">
+        <div style="font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#b91c1c;margin-bottom:10px;">Bảng xếp hạng chung cuộc</div>
+        <table style="width:100%;border-collapse:collapse;font-size:14.5px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+          <thead><tr style="background:#fef2f2;">
+            <th style="padding:10px;width:50px;"></th>
+            <th style="padding:10px;text-align:left;font-size:12px;color:#b91c1c;">XẾP HẠNG</th>
+            <th style="padding:10px;text-align:left;font-size:12px;color:#b91c1c;">ĐỘI THI</th>
+            <th style="padding:10px;text-align:center;font-size:12px;color:#b91c1c;">SỐ PHIẾU</th>
+            <th style="padding:10px;text-align:center;font-size:12px;color:#b91c1c;">ĐIỂM TB</th>
+          </tr></thead>
+          <tbody>${podiumRows}</tbody>
+        </table>
+
+        <div style="font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#b91c1c;margin:24px 0 10px;">Điểm trung bình theo tiêu chí</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+          <thead><tr style="background:#fef2f2;">
+            <th style="padding:9px 8px;text-align:left;font-size:11px;color:#b91c1c;">ĐỘI</th>
+            ${critHead}
+            <th style="padding:9px 6px;text-align:center;font-size:11px;color:#b91c1c;">TB</th>
+          </tr></thead>
+          <tbody>${critRows}</tbody>
+        </table>
+
+        <table style="width:100%;margin-top:40px;">
+          <tr>
+            <td style="width:50%;text-align:center;font-size:13.5px;color:#374151;">
+              <div style="font-weight:800;">BAN TỔ CHỨC</div>
+              <div style="color:#6b7280;font-size:12px;">(Ký, ghi rõ họ tên)</div>
+              <div style="height:70px;"></div>
+            </td>
+            <td style="width:50%;text-align:center;font-size:13.5px;color:#374151;">
+              <div style="font-style:italic;color:#6b7280;">Ngày ${dstr}</div>
+              <div style="font-weight:800;margin-top:4px;">TRƯỞNG BAN GIÁM KHẢO</div>
+              <div style="color:#6b7280;font-size:12px;">(Ký, ghi rõ họ tên)</div>
+              <div style="height:50px;"></div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function getRanked(){
+  const data = load();
+  const agg = TEAMS.map(t => {
+    const subs = data.filter(d => d.team === t.name);
+    const totals = subs.map(s => s.total);
+    const avg = totals.length ? totals.reduce((a,b)=>a+b,0)/totals.length : 0;
+    const critAvg = [0,0,0,0,0].map((_,i) => subs.length ? subs.reduce((a,s)=>a+(s.scores[i]?s.scores[i].value:0),0)/subs.length : 0);
+    return {team:t, count:subs.length, avg, critAvg};
+  });
+  return agg.filter(a=>a.count>0).sort((a,b)=>b.avg-a.avg);
+}
+
+document.getElementById('pdfBtn').onclick = async () => {
+  const ranked = getRanked();
+  if(!ranked.length){ alert('Chưa có dữ liệu để tạo PDF.'); return; }
+  const btn = document.getElementById('pdfBtn');
+  const old = btn.textContent; btn.textContent='Đang tạo PDF...'; btn.disabled=true;
+  try{
+    const holder = document.createElement('div');
+    holder.innerHTML = buildResultHTML(ranked);
+    document.body.appendChild(holder);
+    const sheet = holder.querySelector('#pdfResult');
+    const canvas = await html2canvas(sheet, {scale:2, backgroundColor:'#ffffff'});
+    document.body.removeChild(holder);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    const pw = pdf.internal.pageSize.getWidth();
+    const ph = pdf.internal.pageSize.getHeight();
+    const imgH = canvas.height * pw / canvas.width;
+    const finalH = Math.min(imgH, ph);
+    const finalW = imgH > ph ? pw * (ph/imgH) : pw;
+    pdf.addImage(canvas.toDataURL('image/jpeg',0.95), 'JPEG', (pw-finalW)/2, 0, finalW, finalH);
+    pdf.save('BienBan_KetQua_HoiThiNauAn.pdf');
+  }catch(err){
+    alert('Không tạo được PDF: ' + err.message);
+  }finally{ btn.textContent=old; btn.disabled=false; }
+};
+
+render();
+window.addEventListener('focus', render); // refresh when coming back from scoring page
+</script>
+</body>
+</html>

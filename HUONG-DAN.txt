@@ -1,0 +1,47 @@
+HỘI THI NẤU ĂN: MÂM CƠM SUM VẦY CUỐI TUẦN
+App Phiếu Chấm Điểm - Hướng dẫn sử dụng
+========================================
+
+GỒM 2 FILE:
+  1. index.html    -> Phiếu chấm điểm (dành cho từng Ban Giám Khảo)
+  2. tong-hop.html -> Màn hình tổng hợp kết quả chung cuộc
+
+CÁCH DÙNG:
+  - Nhấp đúp vào "index.html" để mở bằng trình duyệt (Chrome / Edge / Cốc Cốc).
+  - Dùng được trên máy tính, điện thoại, máy tính bảng.
+
+CHO BAN GIÁM KHẢO (file index.html):
+  1. Chọn Ngày chấm (đã điền sẵn 20/10/2026) và nhập Tên BGK.
+  2. Chọn 1 trong 4 đội thi.
+  3. Kéo thanh hoặc gõ số điểm cho 5 tiêu chí (tổng điểm tự cộng).
+  4. Viết nhận xét (nếu có).
+  5. Nhấn "Submit Chấm Điểm".
+  6. Sau khi submit: có thể "In phiếu" hoặc "Tải .txt" để lưu/nộp.
+  -> Muốn chấm đội tiếp theo: nhấn "Chấm đội khác".
+
+XEM KẾT QUẢ CHUNG CUỘC (file tong-hop.html):
+  - Nhấn "Xem tổng hợp kết quả" ở góc phải phiếu chấm, hoặc mở trực tiếp tong-hop.html.
+  - Hiển thị bảng xếp hạng (Nhất/Nhì/Ba), điểm trung bình theo tiêu chí,
+    và chi tiết tất cả phiếu đã submit.
+  - Nút "In / Lưu PDF" để in biên bản kết quả.
+  - Nút "Xuất CSV" để mở bằng Excel.
+
+LƯU Ý QUAN TRỌNG:
+  - Dữ liệu được lưu TRÊN TỪNG THIẾT BỊ (trong trình duyệt).
+  - Để tổng hợp đúng, nên cho tất cả BGK chấm trên CÙNG 1 MÁY/1 trình duyệt,
+    hoặc mỗi BGK tải .txt rồi tổng hợp thủ công.
+  - Nếu dùng chung 1 máy: mỗi BGK lần lượt nhập tên mình, chọn đội, chấm, submit.
+    Trang tổng hợp sẽ tự cộng trung bình tất cả phiếu.
+
+THANG ĐIỂM (tổng 100đ):
+  a. Hương vị món ăn ............................ 40đ
+  b. Sự hợp lý & Cân đối dinh dưỡng ............. 20đ
+  c. Trình bày & Thẩm mỹ ........................ 20đ
+  d. Thuyết trình ............................... 10đ
+  e. An toàn vệ sinh & Dọn dẹp .................. 10đ
+
+4 ĐỘI THI:
+  A. CĐBP Khối Văn phòng
+  B. CĐBP Xưởng Bột giặt
+  C. CĐBP Xưởng Tẩy Rửa Lỏng
+  D. CĐBP Kho vận
