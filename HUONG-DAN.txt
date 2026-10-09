@@ -52,3 +52,11 @@ DUNG CHUNG NHIEU THIET BI:
   - Push code len GitHub de Vercel deploy lai.
   - Khi da cau hinh, tat ca phieu submit se luu chung tren Supabase.
   - Khong dung service_role key tren frontend.
+
+TAI KHOAN:
+  - Ong Mai Duc Lam
+  - Ba Nguyen Thi Suong
+  - Ba Ngo Thi Quynh Nhu
+  - Ong Phan Hoang Trung Hieu
+  - Ong Pham Duc Truong (QUAN TRI: xem tong hop, in va tai bao cao)
+  Khi vao app, chon dung ten de dang nhap. 4 tai khoan BGK khong thay muc tong hop va nut tai PDF/CSV.

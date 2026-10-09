@@ -9,6 +9,7 @@
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="supabase-config.js"></script>
 <script src="supabase-client.js"></script>
+<script src="auth.js"></script>
 <style>
   :root{
     --red:#b91c1c;
@@ -229,7 +230,7 @@
       <div class="title-sub">Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần</div>
       <span class="ribbon">🍲 Tổ chức tại Nhà Ăn · Thứ Ba 20/10/2026</span>
     </div>
-    <a class="results-link" href="tong-hop.html">📊 Xem tổng hợp kết quả</a>
+    <a class="results-link" id="resultsLink" href="tong-hop.html">📊 Xem tổng hợp kết quả</a>
   </header>
 
   <!-- JUDGE INFO -->
@@ -293,7 +294,7 @@
       <button id="newSheet">Chấm đội khác</button>
       <button class="primary" id="exportBtn">⬇ Tải PDF</button>
     </div>
-    <a href="tong-hop.html" style="display:block;margin-top:14px;font-size:13px;color:var(--red);font-weight:700;text-decoration:none;">Xem tổng hợp kết quả →</a>
+    <a href="tong-hop.html" id="goResults" style="display:block;margin-top:14px;font-size:13px;color:var(--red);font-weight:700;text-decoration:none;">Xem tổng hợp kết quả →</a>
   </div>
 </div>
 
@@ -312,6 +313,20 @@ const CRITERIA = [
   {id:'c4', name:'Thuyết trình', max:10, desc:'Trôi chảy, logic, ý nghĩa hay'},
   {id:'c5', name:'An toàn vệ sinh & Dọn dẹp', max:10, desc:'Khu vực nấu sạch sẽ trong và sau khi thi'},
 ];
+
+const currentUser = window.NETCO_AUTH.currentUser();
+const isAdmin = window.NETCO_AUTH.isAdmin();
+const judgeInput = document.getElementById('judgeName');
+if(currentUser){
+  judgeInput.value = currentUser.name;
+  judgeInput.readOnly = true;
+  judgeInput.title = 'Tên được lấy từ tài khoản đăng nhập';
+}
+if(!isAdmin){
+  document.getElementById('resultsLink').style.display = 'none';
+  document.getElementById('exportBtn').style.display = 'none';
+  document.getElementById('goResults').style.display = 'none';
+}
 
 const state = { team:null, scores:{} };
 CRITERIA.forEach(c => state.scores[c.id] = 0);
@@ -378,6 +393,7 @@ function recalc(){
 
 // Submit lên Supabase (hoặc localStorage nếu chưa cấu hình Supabase)
 document.getElementById('submitBtn').addEventListener('click', async () => {
+  if(!currentUser){ alert('Vui lòng chọn tài khoản để đăng nhập trước.'); return; }
   let ok = true;
   const date = document.getElementById('judgeDate');
   const name = document.getElementById('judgeName');
@@ -581,6 +597,7 @@ async function downloadPdf(p){
 }
 
 document.getElementById('exportBtn').addEventListener('click', () => {
+  if(!isAdmin){ alert('Chỉ tài khoản quản trị mới được tải báo cáo.'); return; }
   const p = window._lastPayload;
   if(!p) return;
   downloadPdf(p);

@@ -56,3 +56,14 @@ window.SUPABASE_CONFIG = {
 6. Tất cả BGK truy cập cùng `https://hoainamit.cloud`; phiếu submit sẽ lưu trên Supabase và trang tổng hợp sẽ đọc dữ liệu chung.
 
 `anonKey` được phép xuất hiện ở frontend. Không đưa `service_role` key vào website. RLS đã được bật trong SQL và chỉ cho phép đọc/thêm, không cho xóa công khai.
+
+## Tài khoản sử dụng
+
+- Ông Mai Đức Lâm — Ban Giám Khảo
+- Bà Nguyễn Thị Sương — Ban Giám Khảo
+- Bà Ngô Thị Quỳnh Như — Ban Giám Khảo
+- Ông Phan Hoàng Trung Hiếu — Ban Giám Khảo
+- Ông Phạm Đức Trường — Quản trị hệ thống
+
+Bốn tài khoản BGK chỉ chấm và submit. Tài khoản Ông Phạm Đức Trường được xem tổng hợp, in và tải PDF/CSV.
+Lưu ý: màn hình chọn tên là phân quyền giao diện; nếu cần bảo mật chống người khác giả danh, cần bổ sung mật khẩu/Supabase Auth.
