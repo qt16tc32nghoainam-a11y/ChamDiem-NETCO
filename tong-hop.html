@@ -7,6 +7,8 @@
 <title>Tổng Hợp Kết Quả - Hội Thi Nấu Ăn</title>
 <script src="vendor/html2canvas.min.js"></script>
 <script src="vendor/jspdf.umd.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-client.js"></script>
 <style>
   :root{
     --red:#b91c1c;--red-dark:#7f1d1d;--red-soft:#fef2f2;--gold:#d4af37;
@@ -120,11 +122,17 @@ const TEAMS = [
 const CRIT = ['Hương vị','Dinh dưỡng','Trình bày','Thuyết trình','Vệ sinh'];
 const KEY = 'chamdiem_submissions';
 
-function load(){ return JSON.parse(localStorage.getItem(KEY) || '[]'); }
-function save(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
+async function load(){ return window.NETCO_DB.list(); }
 
-function render(){
-  const data = load();
+async function render(){
+  let data;
+  try {
+    data = await load();
+  } catch (error) {
+    document.getElementById('countPill').textContent = 'Lỗi tải dữ liệu';
+    document.getElementById('content').innerHTML = `<div class="card"><div class="empty">⚠️ Không tải được dữ liệu chung.<br><small>${error.message}</small></div></div>`;
+    return;
+  }
   const content = document.getElementById('content');
   document.getElementById('countPill').innerHTML = `Đã nhận <b>${data.length}</b> phiếu chấm`;
 
@@ -201,28 +209,34 @@ function render(){
       </table></div>
     </div>`;
 
-  // Delete handlers
+  // Xóa cục bộ chỉ dành cho chế độ chưa cấu hình Supabase.
   content.querySelectorAll('.del-btn').forEach(b => {
-    b.onclick = () => {
+    b.onclick = async () => {
+      if(window.NETCO_DB.configured){
+        alert('Dữ liệu online không cho xóa công khai. Hãy xóa trong Supabase Dashboard.');
+        return;
+      }
       if(!confirm('Xóa phiếu chấm này?')) return;
-      const arr = load();
-      arr.splice(Number(b.dataset.idx),1);
-      save(arr);
-      render();
+      await window.NETCO_DB.remove(Number(b.dataset.idx));
+      await render();
     };
   });
 }
 
-document.getElementById('clearBtn').onclick = () => {
+document.getElementById('clearBtn').onclick = async () => {
+  if(window.NETCO_DB.configured){
+    alert('Dữ liệu đang lưu online. Muốn xóa, vào Supabase Dashboard > Table Editor.');
+    return;
+  }
   if(!confirm('Xóa TOÀN BỘ phiếu chấm đã lưu? Không thể hoàn tác.')) return;
   localStorage.removeItem(KEY);
-  render();
+  await render();
 };
 
 document.getElementById('printBtn').onclick = () => window.print();
 
-document.getElementById('exportCsvBtn').onclick = () => {
-  const data = load();
+document.getElementById('exportCsvBtn').onclick = async () => {
+  const data = await load();
   if(!data.length){ alert('Chưa có dữ liệu để xuất.'); return; }
   let csv = '\uFEFF'; // BOM for Excel UTF-8
   csv += 'BGK,Doi thi,Ngay cham,'+CRIT.join(',')+',Tong,Nhan xet\n';
@@ -316,8 +330,8 @@ function buildResultHTML(ranked){
   </div>`;
 }
 
-function getRanked(){
-  const data = load();
+async function getRanked(){
+  const data = await load();
   const agg = TEAMS.map(t => {
     const subs = data.filter(d => d.team === t.name);
     const totals = subs.map(s => s.total);
@@ -329,7 +343,7 @@ function getRanked(){
 }
 
 document.getElementById('pdfBtn').onclick = async () => {
-  const ranked = getRanked();
+  const ranked = await getRanked();
   if(!ranked.length){ alert('Chưa có dữ liệu để tạo PDF.'); return; }
   const btn = document.getElementById('pdfBtn');
   const old = btn.textContent; btn.textContent='Đang tạo PDF...'; btn.disabled=true;

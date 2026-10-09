@@ -3,3 +3,5 @@ node_modules/
 Thumbs.db
 .vercel
 *.log
+# Local Supabase credentials/config can be ignored if desired
+# supabase-config.js

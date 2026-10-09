@@ -45,3 +45,10 @@ THANG ĐIỂM (tổng 100đ):
   B. CĐBP Xưởng Bột giặt
   C. CĐBP Xưởng Tẩy Rửa Lỏng
   D. CĐBP Kho vận
+
+DUNG CHUNG NHIEU THIET BI:
+  - Chay file supabase-schema.sql trong Supabase SQL Editor.
+  - Dien Project URL va anon key vao supabase-config.js.
+  - Push code len GitHub de Vercel deploy lai.
+  - Khi da cau hinh, tat ca phieu submit se luu chung tren Supabase.
+  - Khong dung service_role key tren frontend.

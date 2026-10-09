@@ -7,7 +7,8 @@ App chấm điểm điện tử cho **Hội thi Nấu Ăn: Mâm Cơm Sum Vầy C
 - **Tổng hợp kết quả** (`tong-hop.html`): bảng xếp hạng Nhất/Nhì/Ba, điểm trung bình theo tiêu chí, chi tiết các phiếu.
 - **Tải PDF** có thiết kế đẹp (dùng jsPDF + html2canvas, chạy offline từ thư mục `vendor/`).
 - **Xuất CSV** mở bằng Excel.
-- Dữ liệu lưu trên trình duyệt (localStorage).
+- Dữ liệu dùng chung qua **Supabase** để nhiều BGK chấm trên nhiều thiết bị vẫn xem được toàn bộ kết quả.
+- Nếu chưa điền cấu hình Supabase, app tự chuyển về localStorage để chạy thử trên một máy.
 
 ## Thang điểm (100đ)
 | Tiêu chí | Điểm |
@@ -33,3 +34,25 @@ Rồi truy cập http://localhost:5500
 
 ## Lưu ý
 Dữ liệu chấm điểm lưu cục bộ theo từng thiết bị/trình duyệt. Để tổng hợp đúng kết quả chung cuộc, nên cho tất cả BGK chấm trên **cùng một thiết bị/trình duyệt**.
+
+## Cấu hình database dùng chung
+
+### 1. Tạo Supabase project
+1. Vào https://supabase.com và tạo project mới.
+2. Mở **SQL Editor**, dán toàn bộ file `supabase-schema.sql`, rồi bấm **Run**.
+3. Vào **Project Settings → API**, lấy:
+   - Project URL
+   - Publishable/anon key
+4. Mở `supabase-config.js` và điền:
+
+```js
+window.SUPABASE_CONFIG = {
+  url: 'https://YOUR_PROJECT.supabase.co',
+  anonKey: 'YOUR_SUPABASE_ANON_KEY'
+};
+```
+
+5. Commit và push lại lên GitHub. Vercel sẽ tự deploy phiên bản mới.
+6. Tất cả BGK truy cập cùng `https://hoainamit.cloud`; phiếu submit sẽ lưu trên Supabase và trang tổng hợp sẽ đọc dữ liệu chung.
+
+`anonKey` được phép xuất hiện ở frontend. Không đưa `service_role` key vào website. RLS đã được bật trong SQL và chỉ cho phép đọc/thêm, không cho xóa công khai.

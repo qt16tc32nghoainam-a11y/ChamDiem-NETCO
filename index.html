@@ -7,6 +7,8 @@
 <title>Phiếu Chấm Điểm - Hội Thi Nấu Ăn</title>
 <script src="vendor/html2canvas.min.js"></script>
 <script src="vendor/jspdf.umd.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-client.js"></script>
 <style>
   :root{
     --red:#b91c1c;
@@ -374,11 +376,12 @@ function recalc(){
   document.getElementById('miniScore').textContent = total;
 }
 
-// Submit
-document.getElementById('submitBtn').addEventListener('click', () => {
+// Submit lên Supabase (hoặc localStorage nếu chưa cấu hình Supabase)
+document.getElementById('submitBtn').addEventListener('click', async () => {
   let ok = true;
   const date = document.getElementById('judgeDate');
   const name = document.getElementById('judgeName');
+  const submitBtn = document.getElementById('submitBtn');
   [date,name].forEach(el => el.classList.remove('err'));
 
   if(!date.value){ date.classList.add('err'); ok=false; }
@@ -393,14 +396,20 @@ document.getElementById('submitBtn').addEventListener('click', () => {
   }
 
   const payload = buildPayload();
-  // Save locally
-  const key = 'chamdiem_submissions';
-  const arr = JSON.parse(localStorage.getItem(key) || '[]');
-  arr.push(payload);
-  localStorage.setItem(key, JSON.stringify(arr));
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Đang lưu...';
+  try {
+    await window.NETCO_DB.insert(payload);
+  } catch (error) {
+    alert('Không thể lưu phiếu lên hệ thống.\n' + error.message);
+    return;
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
 
-  // Modal summary
-  const total = Object.values(state.scores).reduce((a,b)=>a+b,0);
+  const total = payload.total;
   let rows = CRITERIA.map(c=>`<div class="r"><span>${c.name}</span><b>${state.scores[c.id]}/${c.max}</b></div>`).join('');
   rows += `<div class="r" style="border-top:1px dashed #ddd;margin-top:6px;padding-top:8px;"><span><b>Đội: ${state.team.name}</b></span><b>${total}/100</b></div>`;
   document.getElementById('modalSummary').innerHTML = rows;
@@ -414,6 +423,7 @@ function buildPayload(){
     contest:'Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần',
     date: document.getElementById('judgeDate').value,
     judge: document.getElementById('judgeName').value.trim(),
+    teamId: state.team ? state.team.id : '',
     team: state.team ? state.team.name : '',
     scores: CRITERIA.map(c=>({name:c.name,max:c.max,value:state.scores[c.id]})),
     total: Object.values(state.scores).reduce((a,b)=>a+b,0),
