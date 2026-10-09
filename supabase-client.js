@@ -49,13 +49,17 @@
     return (await response.json()).map(fromRow);
   }
 
-  async function listByJudge(judgeId, judgeName) {
+  async function listByJudge(judgeId, judgeName, contestDate) {
     if (!configured) {
       return (JSON.parse(localStorage.getItem(localKey) || '[]'))
-        .filter(item => item.judgeId === judgeId || item.judge_id === judgeId || item.judge === judgeName);
+        .filter(item =>
+          (item.judgeId === judgeId || item.judge_id === judgeId || item.judge === judgeName)
+          && (!contestDate || item.date === contestDate)
+        );
     }
+    const dateQuery = contestDate ? `&contest_date=eq.${encodeURIComponent(contestDate)}` : '';
     const response = await fetch(
-      `${url}/rest/v1/cham_diem_submissions?select=*&judge_id=eq.${encodeURIComponent(judgeId)}&order=created_at.desc`,
+      `${url}/rest/v1/cham_diem_submissions?select=*&judge_id=eq.${encodeURIComponent(judgeId)}${dateQuery}&order=created_at.desc`,
       { headers: headers() }
     );
     if (!response.ok) {
@@ -63,7 +67,10 @@
       // Compatibility with the old table before judge_id migration is run.
       if (response.status === 400 && /judge_id|schema cache|PGRST204/i.test(message)) {
         const all = await list();
-        return all.filter(item => item.judgeId === judgeId || item.judge === judgeName);
+        return all.filter(item =>
+          (item.judgeId === judgeId || item.judge === judgeName)
+          && (!contestDate || item.date === contestDate)
+        );
       }
       throw new Error(`Không kiểm tra được đội đã chấm (${response.status})`);
     }

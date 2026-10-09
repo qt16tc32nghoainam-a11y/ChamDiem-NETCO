@@ -71,9 +71,10 @@ begin
   end if;
 end $$;
 
--- Ràng buộc quan trọng: một BGK không thể chấm cùng một đội lần thứ hai.
+-- Ràng buộc quan trọng: một BGK không thể chấm cùng một đội trong cùng một ngày.
+drop index if exists public.one_team_one_judge;
 create unique index if not exists one_team_one_judge
-  on public.cham_diem_submissions (team_id, judge_id);
+  on public.cham_diem_submissions (contest_date, team_id, judge_id);
 
 create index if not exists cham_diem_submissions_team_idx
   on public.cham_diem_submissions (team_id);

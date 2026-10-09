@@ -67,3 +67,5 @@ window.SUPABASE_CONFIG = {
 
 Bốn tài khoản BGK chỉ chấm và submit. Tài khoản Ông Phạm Đức Trường được xem tổng hợp, in và tải PDF/CSV.
 Lưu ý: màn hình chọn tên là phân quyền giao diện; nếu cần bảo mật chống người khác giả danh, cần bổ sung mật khẩu/Supabase Auth.
+
+Quy tắc chấm lại: cùng một BGK có thể chấm lại cùng đội ở ngày khác. Chỉ khóa khi trùng cả 3 yếu tố: ngày chấm + đội thi + BGK.

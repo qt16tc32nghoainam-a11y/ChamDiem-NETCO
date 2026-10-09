@@ -362,8 +362,19 @@ TEAMS.forEach(t => {
 
 async function markAlreadyJudgedTeams(){
   if(!currentUser || currentUser.role !== 'judge') return;
+  judgedTeamIds.clear();
+  state.team = null;
+  document.getElementById('miniTeam').textContent = '—';
+  document.querySelectorAll('.team-btn').forEach(button => {
+    button.disabled = false;
+    button.classList.remove('completed', 'active');
+    button.title = '';
+    const stateLabel = button.querySelector('.team-state');
+    if(stateLabel) stateLabel.textContent = '';
+  });
   try {
-    const submitted = await window.NETCO_DB.listByJudge(currentUser.id, currentUser.name);
+    const selectedDate = document.getElementById('judgeDate').value;
+    const submitted = await window.NETCO_DB.listByJudge(currentUser.id, currentUser.name, selectedDate);
     submitted.forEach(item => judgedTeamIds.add(item.teamId));
     TEAMS.forEach(team => {
       if(!judgedTeamIds.has(team.id)) return;
@@ -373,13 +384,14 @@ async function markAlreadyJudgedTeams(){
       button.classList.add('completed');
       const stateLabel = button.querySelector('.team-state');
       if(stateLabel) stateLabel.textContent = '✓ Đã chấm';
-      button.title = 'Anh/chị đã chấm đội này rồi';
+      button.title = 'Anh/chị đã chấm đội này trong ngày này rồi';
     });
   } catch(error) {
     alert('Không kiểm tra được các đội đã chấm. Vui lòng tải lại trang.\n' + error.message);
   }
 }
 markAlreadyJudgedTeams();
+document.getElementById('judgeDate').addEventListener('change', markAlreadyJudgedTeams);
 
 // Render criteria
 const critEl = document.getElementById('criteria');
