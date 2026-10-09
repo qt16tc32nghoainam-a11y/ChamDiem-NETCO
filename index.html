@@ -339,8 +339,13 @@ const state = { team:null, scores:{} };
 const judgedTeamIds = new Set();
 CRITERIA.forEach(c => state.scores[c.id] = 0);
 
-// Default date = contest day
-document.getElementById('judgeDate').value = '2026-10-20';
+// Default: ngày hiện tại theo múi giờ của thiết bị
+function getTodayISO(){
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+document.getElementById('judgeDate').value = getTodayISO();
 
 // Render teams
 const teamsEl = document.getElementById('teams');
