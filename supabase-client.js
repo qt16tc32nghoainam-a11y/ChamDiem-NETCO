@@ -49,16 +49,24 @@
     return (await response.json()).map(fromRow);
   }
 
-  async function listByJudge(judgeId) {
+  async function listByJudge(judgeId, judgeName) {
     if (!configured) {
       return (JSON.parse(localStorage.getItem(localKey) || '[]'))
-        .filter(item => item.judgeId === judgeId || item.judge_id === judgeId);
+        .filter(item => item.judgeId === judgeId || item.judge_id === judgeId || item.judge === judgeName);
     }
     const response = await fetch(
       `${url}/rest/v1/cham_diem_submissions?select=*&judge_id=eq.${encodeURIComponent(judgeId)}&order=created_at.desc`,
       { headers: headers() }
     );
-    if (!response.ok) throw new Error(`Không kiểm tra được đội đã chấm (${response.status})`);
+    if (!response.ok) {
+      const message = await response.text();
+      // Compatibility with the old table before judge_id migration is run.
+      if (response.status === 400 && /judge_id|schema cache|PGRST204/i.test(message)) {
+        const all = await list();
+        return all.filter(item => item.judgeId === judgeId || item.judge === judgeName);
+      }
+      throw new Error(`Không kiểm tra được đội đã chấm (${response.status})`);
+    }
     return (await response.json()).map(fromRow);
   }
 
@@ -90,6 +98,22 @@
     });
     if (!response.ok) {
       const message = await response.text();
+      // Allow the app to keep working while an existing project is being migrated.
+      if (response.status === 400 && /judge_id|schema cache|PGRST204/i.test(message)) {
+        const legacyBody = Object.assign({}, body);
+        delete legacyBody.judge_id;
+        const legacyResponse = await fetch(`${url}/rest/v1/cham_diem_submissions`, {
+          method: 'POST',
+          headers: headers({ Prefer: 'return=representation' }),
+          body: JSON.stringify(legacyBody)
+        });
+        if (!legacyResponse.ok) {
+          const legacyMessage = await legacyResponse.text();
+          throw new Error(legacyMessage || `Không lưu được dữ liệu (${legacyResponse.status})`);
+        }
+        const legacyRows = await legacyResponse.json();
+        return legacyRows[0] ? fromRow(legacyRows[0]) : payload;
+      }
       throw new Error(message || `Không lưu được dữ liệu (${response.status})`);
     }
     const rows = await response.json();
