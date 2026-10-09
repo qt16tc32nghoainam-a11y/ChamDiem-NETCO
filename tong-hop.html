@@ -121,7 +121,7 @@
   <header class="sheet-head">
     <div class="union">Công đoàn Công ty Cổ phần Bột giặt NET</div>
     <div class="title-main">TỔNG HỢP KẾT QUẢ CHẤM ĐIỂM</div>
-    <div class="title-sub">Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần · 20/10/2026</div>
+    <div class="title-sub">Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần · <span id="summaryDateText"></span></div>
   </header>
 
   <div class="toolbar">
@@ -181,6 +181,11 @@ function getTodayISO(){
 
 const dateFilter = { from: getTodayISO(), to: getTodayISO() };
 
+function updateSummaryDateText(){
+  const element = document.getElementById('summaryDateText');
+  if(element) element.textContent = getReportDateText();
+}
+
 function filterData(data){
   return data.filter(item => {
     const date = item.date || '';
@@ -204,6 +209,7 @@ async function render(){
     return;
   }
   const content = document.getElementById('content');
+  updateSummaryDateText();
   document.getElementById('countPill').innerHTML = dateFilter.from || dateFilter.to
     ? `Đã lọc <b>${data.length}</b> / ${allData.length} phiếu chấm`
     : `Đã nhận <b>${data.length}</b> phiếu chấm`;
@@ -364,7 +370,7 @@ function getReportDateText(){
   }
   if(dateFilter.from) return `Từ ${formatDateVN(dateFilter.from)}`;
   if(dateFilter.to) return `Đến ${formatDateVN(dateFilter.to)}`;
-  return formatDateVN(getTodayISO());
+  return 'Tất cả ngày';
 }
 
 function buildResultHTML(ranked){
@@ -386,9 +392,11 @@ function buildResultHTML(ranked){
       <td style="padding:10px 6px;text-align:center;font-weight:800;color:#b91c1c;">${a.avg.toFixed(1)}</td>
     </tr>`).join('');
   const reportDate = getReportDateText();
-  const signatureDate = dateFilter.from && dateFilter.to && dateFilter.from !== dateFilter.to
-    ? `Đến ngày ${formatDateVN(dateFilter.to)}`
-    : `Ngày ${reportDate}`;
+  const signatureDate = !dateFilter.from && !dateFilter.to
+    ? 'Ngày lập báo cáo'
+    : dateFilter.from && dateFilter.to && dateFilter.from !== dateFilter.to
+      ? `Đến ngày ${formatDateVN(dateFilter.to)}`
+      : `Ngày ${reportDate}`;
   return `
   <div id="pdfResult" style="width:794px;background:#fff;font-family:'Segoe UI',Arial,sans-serif;color:#1f2937;position:fixed;left:-9999px;top:0;">
     <div style="border:3px solid #b91c1c;border-radius:14px;overflow:hidden;margin:34px;">
