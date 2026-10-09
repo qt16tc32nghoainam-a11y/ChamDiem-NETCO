@@ -52,6 +52,25 @@
   .filter-field input:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(185,28,28,.1);}
   .filter-actions{display:flex;gap:8px;}
   .filter-note{font-size:12px;color:var(--muted);margin-left:auto;}
+  .group-card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:0;margin-top:16px;border:1px solid rgba(0,0,0,.04);overflow:hidden;}
+  .group-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;background:linear-gradient(90deg,#fef2f2,#fff);border-bottom:1px solid #fee2e2;}
+  .group-title{font-size:16px;font-weight:800;color:#1f2937;}
+  .group-title .badge-sm{vertical-align:middle;margin-right:8px;}
+  .group-count{font-size:12px;font-weight:800;color:#b91c1c;background:#fff;border:1px solid #fecaca;border-radius:999px;padding:5px 10px;white-space:nowrap;}
+  .group-table{width:100%;border-collapse:collapse;font-size:13px;min-width:780px;}
+  .group-table th,.group-table td{border-bottom:1px solid #f0f0f0;padding:11px 10px;text-align:center;vertical-align:middle;}
+  .group-table th:first-child,.group-table td:first-child{text-align:left;min-width:205px;}
+  .group-table thead th{background:#fafafa;color:#6b7280;font-size:11px;text-transform:none;letter-spacing:0;}
+  .judge-head{display:block;color:#1f2937;font-size:12px;font-weight:800;line-height:1.25;}
+  .judge-sub{display:block;color:#9ca3af;font-size:10px;font-weight:600;margin-top:3px;}
+  .score-cell{font-size:16px;font-weight:800;color:#b91c1c;font-variant-numeric:tabular-nums;}
+  .score-cell.pending{color:#9ca3af;font-size:13px;font-weight:600;}
+  .criterion-name{font-weight:700;color:#374151;}
+  .criterion-max{font-size:11px;color:#9ca3af;margin-left:4px;}
+  .group-table tfoot td{background:#111827;color:#fff;font-weight:800;border-bottom:0;}
+  .group-table tfoot .score-cell{color:#fff;font-size:18px;}
+  .group-empty{padding:16px 18px;color:#9ca3af;font-size:13px;}
+  @media(max-width:720px){.filter-note{width:100%;margin-left:0;}.filter-card{align-items:stretch;}.filter-actions{align-items:end;}.group-head{padding:13px 14px;}}
 
   /* Podium */
   .podium{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px;}
@@ -144,8 +163,23 @@ const TEAMS = [
   {letter:'D', name:'CĐBP Kho vận'},
 ];
 const CRIT = ['Hương vị','Dinh dưỡng','Trình bày','Thuyết trình','Vệ sinh'];
+const CRIT_FULL = ['Hương vị món ăn','Sự hợp lý & Cân đối dinh dưỡng','Trình bày & Thẩm mỹ','Thuyết trình','An toàn vệ sinh & Dọn dẹp'];
+const CRIT_MAX = [40, 20, 20, 10, 10];
+const JUDGES = [
+  { id: 'mai-duc-lam', name: 'Ông Mai Đức Lâm' },
+  { id: 'nguyen-thi-suong', name: 'Bà Nguyễn Thị Sương' },
+  { id: 'ngo-thi-quynh-nhu', name: 'Bà Ngô Thị Quỳnh Như' },
+  { id: 'phan-hoang-trung-hieu', name: 'Ông Phan Hoàng Trung Hiếu' }
+];
 const KEY = 'chamdiem_submissions';
-const dateFilter = { from: '', to: '' };
+
+function getTodayISO(){
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+const dateFilter = { from: getTodayISO(), to: getTodayISO() };
 
 function filterData(data){
   return data.filter(item => {
@@ -226,15 +260,52 @@ async function render(){
   });
   tbody += '</tbody>';
 
-  // Raw submissions
-  let rawRows = data.map(d => `
-    <tr>
-      <td>${d.judge||'—'}</td>
-      <td class="team-tag">${d.team||'—'}</td>
-      ${d.scores.map(s=>`<td class="num">${s.value}</td>`).join('')}
-      <td class="num avg-cell">${d.total}</td>
-      <td class="num"><button class="del-btn" data-idx="${allData.indexOf(d)}" title="Xóa phiếu này">✕</button></td>
-    </tr>`).join('');
+  // Bảng điểm tách riêng theo từng đội, mỗi cột là một BGK.
+  const groupTables = TEAMS.map(team => {
+    const teamSubs = data.filter(item => item.team === team.name);
+    const judgeSubmission = judge => teamSubs.find(item => item.judgeId === judge.id || item.judge === judge.name);
+    const judgeTotals = JUDGES.map(judge => {
+      const submission = judgeSubmission(judge);
+      return submission ? submission.total : null;
+    });
+    const submittedCount = judgeTotals.filter(value => value !== null).length;
+    const average = submittedCount
+      ? (judgeTotals.filter(value => value !== null).reduce((sum, value) => sum + value, 0) / submittedCount).toFixed(1)
+      : '—';
+    const rows = CRIT_FULL.map((criterion, criterionIndex) => `
+      <tr>
+        <td><span class="criterion-name">${criterion}</span><span class="criterion-max">Tối đa ${CRIT_MAX[criterionIndex]}đ</span></td>
+        ${JUDGES.map(judge => {
+          const submission = judgeSubmission(judge);
+          const score = submission && submission.scores[criterionIndex] ? submission.scores[criterionIndex].value : null;
+          return `<td class="score-cell ${score === null ? 'pending' : ''}">${score === null ? 'Chưa chấm' : score}</td>`;
+        }).join('')}
+        <td class="score-cell">${(() => {
+          const values = JUDGES.map(judge => {
+            const submission = judgeSubmission(judge);
+            return submission && submission.scores[criterionIndex] ? Number(submission.scores[criterionIndex].value) : null;
+          }).filter(value => value !== null);
+          return values.length ? (values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1) : '—';
+        })()}</td>
+      </tr>`).join('');
+    const headers = JUDGES.map(judge => `<th><span class="judge-head">${judge.name}</span><span class="judge-sub">BGK</span></th>`).join('');
+    const totals = JUDGES.map((judge, index) => `<td class="score-cell ${judgeTotals[index] === null ? 'pending' : ''}">${judgeTotals[index] === null ? 'Chưa chấm' : judgeTotals[index]}</td>`).join('');
+    return `
+      <div class="group-card">
+        <div class="group-head">
+          <div class="group-title"><span class="badge-sm">${team.letter}</span>${team.name}</div>
+          <div class="group-count">${submittedCount}/4 BGK đã chấm · TB ${average}</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="group-table">
+            <thead><tr><th>Tiêu chí</th>${headers}<th>Điểm TB</th></tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot><tr><td>TỔNG ĐIỂM</td>${totals}<td class="score-cell">${average}</td></tr></tfoot>
+          </table>
+        </div>
+        ${submittedCount === 0 ? '<div class="group-empty">Chưa có BGK nào submit cho đội này trong ngày đã lọc.</div>' : ''}
+      </div>`;
+  }).join('');
 
   content.innerHTML = `
     ${podium}
@@ -242,26 +313,8 @@ async function render(){
       <div class="section-label">Bảng điểm trung bình theo tiêu chí</div>
       <div style="overflow-x:auto"><table>${maxRow}${tbody}</table></div>
     </div>
-    <div class="card">
-      <div class="section-label">Chi tiết các phiếu đã submit (${data.length})</div>
-      <div style="overflow-x:auto"><table>
-        <thead><tr><th>BGK</th><th>Đội</th>${CRIT.map(c=>`<th class="num">${c}</th>`).join('')}<th class="num">Tổng</th><th></th></tr></thead>
-        <tbody>${rawRows}</tbody>
-      </table></div>
-    </div>`;
-
-  // Xóa cục bộ chỉ dành cho chế độ chưa cấu hình Supabase.
-  content.querySelectorAll('.del-btn').forEach(b => {
-    b.onclick = async () => {
-      if(window.NETCO_DB.configured){
-        alert('Dữ liệu online không cho xóa công khai. Hãy xóa trong Supabase Dashboard.');
-        return;
-      }
-      if(!confirm('Xóa phiếu chấm này?')) return;
-      await window.NETCO_DB.remove(Number(b.dataset.idx));
-      await render();
-    };
-  });
+    <div class="section-label" style="margin:24px 0 10px 2px;">Chi tiết điểm theo từng đội và từng Ban Giám Khảo</div>
+    ${groupTables}`;
 }
 
 document.getElementById('clearBtn').onclick = async () => {
@@ -429,6 +482,8 @@ document.getElementById('resetFilter').onclick = async () => {
   await render();
 };
 
+document.getElementById('fromDate').value = dateFilter.from;
+document.getElementById('toDate').value = dateFilter.to;
 render();
 window.addEventListener('focus', () => render()); // refresh when coming back from scoring page
 </script>
