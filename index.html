@@ -232,7 +232,7 @@
     <div class="center-wrap">
       <div class="title-main">PHIẾU CHẤM ĐIỂM</div>
       <div class="title-sub">Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần</div>
-      <span class="ribbon">🍲 Tổ chức tại Nhà Ăn · Thứ Ba 20/10/2026</span>
+      <span class="ribbon" id="eventDateRibbon">🍲 Tổ chức tại Nhà Ăn</span>
     </div>
     <a class="results-link" id="resultsLink" href="tong-hop.html">📊 Xem tổng hợp kết quả</a>
   </header>
@@ -346,6 +346,22 @@ function getTodayISO(){
   return local.toISOString().slice(0, 10);
 }
 document.getElementById('judgeDate').value = getTodayISO();
+
+function formatVietnameseDate(iso){
+  if(!iso) return 'Chưa chọn ngày';
+  const [year, month, day] = iso.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  const weekdays = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+  return `${weekdays[date.getDay()]} ${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
+}
+
+function updateEventDateRibbon(){
+  const selectedDate = document.getElementById('judgeDate').value;
+  document.getElementById('eventDateRibbon').textContent =
+    `🍲 Tổ chức tại Nhà Ăn · ${formatVietnameseDate(selectedDate)}`;
+}
+updateEventDateRibbon();
+document.getElementById('judgeDate').addEventListener('change', updateEventDateRibbon);
 
 // Render teams
 const teamsEl = document.getElementById('teams');
