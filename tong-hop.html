@@ -32,6 +32,8 @@
   .union{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.95;}
   .title-main{font-size:28px;font-weight:800;margin:12px 0 4px;position:relative;z-index:1;}
   .title-sub{font-size:14.5px;font-style:italic;opacity:.95;position:relative;z-index:1;}
+  .brand-logo{position:absolute;left:18px;top:18px;z-index:2;width:126px;height:auto;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+  @media(max-width:560px){.brand-logo{position:static;display:block;width:128px;margin:0 auto 12px;}}
 
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px;}
   .toolbar .spacer{flex:1;}
@@ -100,6 +102,7 @@
 <body>
 <div class="wrap">
   <header class="sheet-head">
+    <img class="brand-logo" src="assets/masan-group.svg" alt="Masan Group" />
     <div class="union">Công đoàn Công ty Cổ phần Bột giặt NET</div>
     <div class="title-main">TỔNG HỢP KẾT QUẢ CHẤM ĐIỂM</div>
     <div class="title-sub">Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần · 20/10/2026</div>
@@ -322,7 +325,8 @@ function buildResultHTML(ranked){
   return `
   <div id="pdfResult" style="width:794px;background:#fff;font-family:'Segoe UI',Arial,sans-serif;color:#1f2937;position:fixed;left:-9999px;top:0;">
     <div style="border:3px solid #b91c1c;border-radius:14px;overflow:hidden;margin:34px;">
-      <div style="background:linear-gradient(135deg,#b91c1c,#7f1d1d);color:#fff;padding:26px 30px;text-align:center;">
+      <div style="background:linear-gradient(135deg,#b91c1c,#7f1d1d);color:#fff;padding:26px 30px;text-align:center;position:relative;">
+        <img src="assets/masan-group.svg" alt="Masan Group" style="position:absolute;left:24px;top:20px;width:126px;height:auto;border-radius:3px;" />
         <div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.95;">Công đoàn Công ty Cổ phần Bột giặt NET</div>
         <div style="width:60px;height:3px;background:#d4af37;margin:12px auto;border-radius:3px;"></div>
         <div style="font-size:30px;font-weight:800;">BIÊN BẢN TỔNG HỢP KẾT QUẢ</div>

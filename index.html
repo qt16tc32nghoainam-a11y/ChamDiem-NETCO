@@ -75,6 +75,8 @@
   .results-link:hover{background:rgba(255,255,255,.28);}
   @media(max-width:560px){.results-link{position:static;display:inline-block;margin:12px auto 0;}}
   .center-wrap{text-align:center;position:relative;z-index:1;}
+  .brand-logo{position:absolute;left:18px;top:18px;z-index:2;width:126px;height:auto;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+  @media(max-width:560px){.brand-logo{position:static;display:block;width:128px;margin:0 auto 12px;}}
 
   /* ===== Cards ===== */
   .card{
@@ -228,6 +230,7 @@
 
   <!-- HEADER -->
   <header class="sheet-head">
+    <img class="brand-logo" src="assets/masan-group.svg" alt="Masan Group" />
     <div class="union"><span class="dot"></span>Công đoàn Công ty Cổ phần Bột giặt NET</div>
     <div class="center-wrap">
       <div class="title-main">PHIẾU CHẤM ĐIỂM</div>
@@ -543,6 +546,7 @@ function buildSheetHTML(p){
     <div style="border:3px solid #b91c1c;border-radius:14px;overflow:hidden;margin:34px;">
       <!-- Header -->
       <div style="background:linear-gradient(135deg,#b91c1c,#7f1d1d);color:#fff;padding:26px 30px;text-align:center;position:relative;">
+        <img src="assets/masan-group.svg" alt="Masan Group" style="position:absolute;left:24px;top:20px;width:126px;height:auto;border-radius:3px;" />
         <div style="font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.95;">
           Công đoàn Công ty Cổ phần Bột giặt NET
         </div>

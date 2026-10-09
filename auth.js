@@ -49,6 +49,7 @@
       .auth-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#7f1d1d,#b91c1c);display:flex;align-items:center;justify-content:center;padding:18px;}
       .auth-card{width:min(500px,100%);background:#fff;border-radius:22px;padding:28px 22px;box-shadow:0 24px 80px rgba(0,0,0,.3);}
       .auth-brand{text-align:center;color:#b91c1c;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;}
+      .auth-logo{display:block;width:138px;height:auto;margin:0 auto 14px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.18);}
       .auth-card h1{text-align:center;margin:12px 0 5px;font-size:25px;color:#1f2937;}
       .auth-card p{text-align:center;color:#6b7280;font-size:14px;margin:0 0 20px;}
       .auth-users{display:grid;gap:9px;}
@@ -75,6 +76,7 @@
     overlay.id = 'authOverlay';
     overlay.innerHTML = `
       <div class="auth-card">
+        <img class="auth-logo" src="assets/masan-group.svg" alt="Masan Group" />
         <div class="auth-brand">Công đoàn Công ty Cổ phần Bột giặt NET</div>
         <h1>Đăng nhập hệ thống</h1>
         <p>Chọn tên của anh/chị để vào phiếu chấm điểm</p>
