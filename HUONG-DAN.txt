@@ -59,5 +59,4 @@ TAI KHOAN:
   - Ba Ngo Thi Quynh Nhu
   - Ong Phan Hoang Trung Hieu
   - Ong Pham Duc Truong (QUAN TRI: xem tong hop, in va tai bao cao)
-  - Ba Luu Thi Thu Hien (QUAN TRI: xem tong hop, in va tai bao cao)
   Khi vao app, chon dung ten de dang nhap. 4 tai khoan BGK khong thay muc tong hop va nut tai PDF/CSV.

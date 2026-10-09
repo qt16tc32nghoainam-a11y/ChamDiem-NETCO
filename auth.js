@@ -6,8 +6,7 @@
     { id: 'nguyen-thi-suong', name: 'Bà Nguyễn Thị Sương', role: 'judge' },
     { id: 'ngo-thi-quynh-nhu', name: 'Bà Ngô Thị Quỳnh Như', role: 'judge' },
     { id: 'phan-hoang-trung-hieu', name: 'Ông Phan Hoàng Trung Hiếu', role: 'judge' },
-    { id: 'pham-duc-truong', name: 'Ông Phạm Đức Trường', role: 'admin' },
-    { id: 'luu-thi-thu-hien', name: 'Bà Lưu Thị Thu Hiền', role: 'admin' }
+    { id: 'pham-duc-truong', name: 'Ông Phạm Đức Trường', role: 'admin' }
   ];
 
   function currentUser() {
