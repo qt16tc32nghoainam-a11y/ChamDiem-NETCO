@@ -206,6 +206,7 @@
   }
   .modal h3{margin:0 0 6px;font-size:21px;}
   .modal p{margin:0 0 20px;color:var(--muted);font-size:14.5px;}
+  .completion-notice{display:none;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:12px;padding:12px 14px;margin:0 0 18px;font-size:14px;font-weight:700;line-height:1.5;}
   .modal .m-sum{background:var(--red-soft);border-radius:12px;padding:14px;margin-bottom:18px;text-align:left;font-size:14px;}
   .modal .m-sum .r{display:flex;justify-content:space-between;padding:3px 0;}
   .modal .m-sum .r b{color:var(--red);}
@@ -291,13 +292,15 @@
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="check">✓</div>
-    <h3>Đã lưu phiếu chấm!</h3>
-    <p>Phiếu chấm điểm của Ban Giám Khảo đã được ghi nhận.</p>
+    <h3 id="modalTitle">Đã lưu phiếu chấm!</h3>
+    <p id="modalMessage">Phiếu chấm điểm của Ban Giám Khảo đã được ghi nhận.</p>
+    <div class="completion-notice" id="completionNotice">🎉 Anh/chị đã hoàn thành chấm điểm cả 4 đội trong ngày này.</div>
     <div class="m-sum" id="modalSummary"></div>
     <div class="m-actions">
       <button id="newSheet">Chấm đội khác</button>
       <button class="primary" id="exportBtn">⬇ Tải PDF</button>
     </div>
+    <button class="primary" id="finishBtn" style="display:none;width:100%;margin-top:10px;">✓ Xác nhận hoàn tất & Đăng xuất</button>
     <a href="tong-hop.html" id="goResults" style="display:block;margin-top:14px;font-size:13px;color:var(--red);font-weight:700;text-decoration:none;">Xem tổng hợp kết quả →</a>
   </div>
 </div>
@@ -514,6 +517,19 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   const total = payload.total;
   let rows = CRITERIA.map(c=>`<div class="r"><span>${c.name}</span><b>${state.scores[c.id]}/${c.max}</b></div>`).join('');
   rows += `<div class="r" style="border-top:1px dashed #ddd;margin-top:6px;padding-top:8px;"><span><b>Đội: ${state.team.name}</b></span><b>${total}/100</b></div>`;
+  const completedAll = judgedTeamIds.size === TEAMS.length;
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+  const completionNotice = document.getElementById('completionNotice');
+  const finishBtn = document.getElementById('finishBtn');
+  const newSheetBtn = document.getElementById('newSheet');
+  modalTitle.textContent = completedAll ? 'Đã hoàn thành chấm điểm!' : 'Đã lưu phiếu chấm!';
+  modalMessage.textContent = completedAll
+    ? 'Tất cả 4 đội đã được chấm trong ngày này.'
+    : 'Phiếu chấm điểm của Ban Giám Khảo đã được ghi nhận.';
+  completionNotice.style.display = completedAll ? 'block' : 'none';
+  finishBtn.style.display = completedAll ? 'block' : 'none';
+  newSheetBtn.style.display = completedAll ? 'none' : 'block';
   document.getElementById('modalSummary').innerHTML = rows;
   document.getElementById('overlay').classList.add('show');
   window._lastPayload = payload;
@@ -538,6 +554,11 @@ function buildPayload(){
 // Modal actions
 document.getElementById('newSheet').addEventListener('click', () => {
   document.getElementById('overlay').classList.remove('show');
+  document.getElementById('modalTitle').textContent = 'Đã lưu phiếu chấm!';
+  document.getElementById('modalMessage').textContent = 'Phiếu chấm điểm của Ban Giám Khảo đã được ghi nhận.';
+  document.getElementById('completionNotice').style.display = 'none';
+  document.getElementById('finishBtn').style.display = 'none';
+  document.getElementById('newSheet').style.display = 'block';
   state.team = null;
   CRITERIA.forEach(c => {
     state.scores[c.id] = 0;
@@ -550,6 +571,11 @@ document.getElementById('newSheet').addEventListener('click', () => {
   document.getElementById('miniTeam').textContent = '—';
   recalc();
   window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.getElementById('finishBtn').addEventListener('click', () => {
+  document.getElementById('overlay').classList.remove('show');
+  window.NETCO_AUTH.logout();
 });
 
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
