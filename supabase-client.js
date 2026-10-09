@@ -20,6 +20,7 @@
       union: 'Công đoàn Công ty Cổ phần Bột giặt NET',
       contest: 'Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần',
       date: row.contest_date,
+      judgeId: row.judge_id,
       judge: row.judge_name,
       teamId: row.team_id,
       team: row.team_name,
@@ -48,6 +49,19 @@
     return (await response.json()).map(fromRow);
   }
 
+  async function listByJudge(judgeId) {
+    if (!configured) {
+      return (JSON.parse(localStorage.getItem(localKey) || '[]'))
+        .filter(item => item.judgeId === judgeId || item.judge_id === judgeId);
+    }
+    const response = await fetch(
+      `${url}/rest/v1/cham_diem_submissions?select=*&judge_id=eq.${encodeURIComponent(judgeId)}&order=created_at.desc`,
+      { headers: headers() }
+    );
+    if (!response.ok) throw new Error(`Không kiểm tra được đội đã chấm (${response.status})`);
+    return (await response.json()).map(fromRow);
+  }
+
   async function insert(payload) {
     if (!configured) {
       const rows = JSON.parse(localStorage.getItem(localKey) || '[]');
@@ -58,6 +72,7 @@
     const values = payload.scores.map(s => Number(s.value));
     const body = {
       contest_date: payload.date,
+      judge_id: payload.judgeId,
       judge_name: payload.judge,
       team_id: payload.teamId,
       team_name: payload.team,
@@ -88,5 +103,5 @@
     localStorage.setItem(localKey, JSON.stringify(rows));
   }
 
-  window.NETCO_DB = { configured, list, insert, remove };
+  window.NETCO_DB = { configured, list, listByJudge, insert, remove };
 })();

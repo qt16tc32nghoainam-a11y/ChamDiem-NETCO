@@ -120,6 +120,10 @@
     box-shadow:0 0 0 4px rgba(185,28,28,.08);
   }
   .team-btn.active .badge{background:var(--red);color:#fff;}
+  .team-btn.completed{border-color:#bbf7d0;background:#f0fdf4;color:#166534;cursor:not-allowed;opacity:.92;}
+  .team-btn.completed .badge{background:#16a34a;color:#fff;}
+  .team-btn.completed .team-state{margin-left:auto;font-size:11px;font-weight:800;color:#15803d;white-space:nowrap;}
+  .team-btn:disabled{cursor:not-allowed;}
 
   /* ===== Criteria ===== */
   .crit{
@@ -326,9 +330,13 @@ if(!isAdmin){
   document.getElementById('resultsLink').style.display = 'none';
   document.getElementById('exportBtn').style.display = 'none';
   document.getElementById('goResults').style.display = 'none';
+}else{
+  document.getElementById('submitBar').style.display = 'none';
+  document.querySelector('.teams').closest('.card').style.opacity = '.78';
 }
 
 const state = { team:null, scores:{} };
+const judgedTeamIds = new Set();
 CRITERIA.forEach(c => state.scores[c.id] = 0);
 
 // Default date = contest day
@@ -340,8 +348,9 @@ TEAMS.forEach(t => {
   const b = document.createElement('button');
   b.className = 'team-btn';
   b.dataset.id = t.id;
-  b.innerHTML = `<span class="badge">${t.letter}</span>${t.name}`;
+  b.innerHTML = `<span class="badge">${t.letter}</span><span>${t.name}</span><span class="team-state"></span>`;
   b.onclick = () => {
+    if(judgedTeamIds.has(t.id)) return;
     state.team = t;
     document.querySelectorAll('.team-btn').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
@@ -350,6 +359,27 @@ TEAMS.forEach(t => {
   };
   teamsEl.appendChild(b);
 });
+
+async function markAlreadyJudgedTeams(){
+  if(!currentUser || currentUser.role !== 'judge') return;
+  try {
+    const submitted = await window.NETCO_DB.listByJudge(currentUser.id);
+    submitted.forEach(item => judgedTeamIds.add(item.teamId));
+    TEAMS.forEach(team => {
+      if(!judgedTeamIds.has(team.id)) return;
+      const button = document.querySelector(`.team-btn[data-id="${team.id}"]`);
+      if(!button) return;
+      button.disabled = true;
+      button.classList.add('completed');
+      const stateLabel = button.querySelector('.team-state');
+      if(stateLabel) stateLabel.textContent = '✓ Đã chấm';
+      button.title = 'Anh/chị đã chấm đội này rồi';
+    });
+  } catch(error) {
+    alert('Không kiểm tra được các đội đã chấm. Vui lòng tải lại trang.\n' + error.message);
+  }
+}
+markAlreadyJudgedTeams();
 
 // Render criteria
 const critEl = document.getElementById('criteria');
@@ -394,6 +424,18 @@ function recalc(){
 // Submit lên Supabase (hoặc localStorage nếu chưa cấu hình Supabase)
 document.getElementById('submitBtn').addEventListener('click', async () => {
   if(!currentUser){ alert('Vui lòng chọn tài khoản để đăng nhập trước.'); return; }
+  if(currentUser.role !== 'judge'){
+    alert('Tài khoản quản trị chỉ được xem tổng hợp và tải báo cáo.');
+    return;
+  }
+  if(!state.team){
+    alert('Vui lòng chọn đội thi.');
+    return;
+  }
+  if(judgedTeamIds.has(state.team.id)){
+    alert('Anh/chị đã chấm đội này rồi. Mỗi BGK chỉ được chấm mỗi đội một lần.');
+    return;
+  }
   let ok = true;
   const date = document.getElementById('judgeDate');
   const name = document.getElementById('judgeName');
@@ -417,8 +459,19 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   submitBtn.textContent = 'Đang lưu...';
   try {
     await window.NETCO_DB.insert(payload);
+    judgedTeamIds.add(state.team.id);
+    const selectedButton = document.querySelector(`.team-btn[data-id="${state.team.id}"]`);
+    if(selectedButton){
+      selectedButton.disabled = true;
+      selectedButton.classList.add('completed');
+      const stateLabel = selectedButton.querySelector('.team-state');
+      if(stateLabel) stateLabel.textContent = '✓ Đã chấm';
+    }
   } catch (error) {
-    alert('Không thể lưu phiếu lên hệ thống.\n' + error.message);
+    const duplicate = /duplicate|unique|23505/i.test(error.message || '');
+    alert(duplicate
+      ? 'Đội này đã được anh/chị chấm trước đó, hệ thống không cho chấm lại.'
+      : 'Không thể lưu phiếu lên hệ thống.\n' + error.message);
     return;
   } finally {
     submitBtn.disabled = false;
@@ -438,6 +491,7 @@ function buildPayload(){
     union:'Công đoàn Công ty Cổ phần Bột giặt NET',
     contest:'Hội thi Nấu Ăn: Mâm Cơm Sum Vầy Cuối Tuần',
     date: document.getElementById('judgeDate').value,
+    judgeId: currentUser ? currentUser.id : '',
     judge: document.getElementById('judgeName').value.trim(),
     teamId: state.team ? state.team.id : '',
     team: state.team ? state.team.name : '',
