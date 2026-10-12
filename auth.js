@@ -6,6 +6,7 @@
     { id: 'nguyen-thi-suong', name: 'Bà Nguyễn Thị Sương', role: 'judge' },
     { id: 'ngo-thi-quynh-nhu', name: 'Bà Ngô Thị Quỳnh Như', role: 'judge' },
     { id: 'phan-hoang-trung-hieu', name: 'Ông Phan Hoàng Trung Hiếu', role: 'judge' },
+    { id: 'le-thi-tuong-van', name: 'Bà Lê Thị Tường Vân', role: 'judge' },
     { id: 'pham-duc-truong', name: 'Ông Phạm Đức Trường', role: 'admin' }
   ];
 

@@ -10,7 +10,8 @@ create table if not exists public.cham_diem_submissions (
     'mai-duc-lam',
     'nguyen-thi-suong',
     'ngo-thi-quynh-nhu',
-    'phan-hoang-trung-hieu'
+    'phan-hoang-trung-hieu',
+    'le-thi-tuong-van'
   )),
   judge_name text not null check (char_length(trim(judge_name)) between 1 and 120),
   team_id text not null check (team_id in ('vp', 'bg', 'tr', 'kv')),
@@ -37,6 +38,7 @@ set judge_id = case judge_name
   when 'Ông Mai Đức Lâm' then 'mai-duc-lam'
   when 'Bà Nguyễn Thị Sương' then 'nguyen-thi-suong'
   when 'Bà Ngô Thị Quỳnh Như' then 'ngo-thi-quynh-nhu'
+  when 'Bà Lê Thị Tường Vân' then 'le-thi-tuong-van'
   when 'Ông Phan Hoàng Trung Hiếu' then 'phan-hoang-trung-hieu'
   else judge_id
 end
@@ -54,24 +56,20 @@ end $$;
 alter table public.cham_diem_submissions
   alter column judge_id set not null;
 
-do $$
-begin
-  if not exists (
-    select 1 from pg_constraint
-    where conname = 'cham_diem_submissions_judge_id_allowed'
-  ) then
-    alter table public.cham_diem_submissions
-      add constraint cham_diem_submissions_judge_id_allowed
-      check (judge_id in (
-        'mai-duc-lam',
-        'nguyen-thi-suong',
-        'ngo-thi-quynh-nhu',
-        'phan-hoang-trung-hieu'
-      ));
-  end if;
-end $$;
+alter table public.cham_diem_submissions
+  drop constraint if exists cham_diem_submissions_judge_id_allowed;
 
--- Ràng buộc quan trọng: một BGK không thể chấm cùng một đội trong cùng một ngày.
+alter table public.cham_diem_submissions
+  add constraint cham_diem_submissions_judge_id_allowed
+  check (judge_id in (
+    'mai-duc-lam',
+    'nguyen-thi-suong',
+    'ngo-thi-quynh-nhu',
+    'phan-hoang-trung-hieu',
+    'le-thi-tuong-van'
+  ));
+
+-- Ràng buộc: một BGK không thể chấm cùng một đội trong cùng một ngày.
 drop index if exists public.one_team_one_judge;
 create unique index if not exists one_team_one_judge
   on public.cham_diem_submissions (contest_date, team_id, judge_id);

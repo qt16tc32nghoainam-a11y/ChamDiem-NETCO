@@ -63,9 +63,10 @@ window.SUPABASE_CONFIG = {
 - Bà Nguyễn Thị Sương — Ban Giám Khảo
 - Bà Ngô Thị Quỳnh Như — Ban Giám Khảo
 - Ông Phan Hoàng Trung Hiếu — Ban Giám Khảo
+- Bà Lê Thị Tường Vân — Ban Giám Khảo
 - Ông Phạm Đức Trường — Quản trị hệ thống
 
-Bốn tài khoản BGK chỉ chấm và submit. Tài khoản quản trị Ông Phạm Đức Trường được xem tổng hợp, in và tải PDF/CSV.
+Năm tài khoản BGK chỉ chấm và submit. Tài khoản quản trị Ông Phạm Đức Trường được xem tổng hợp, in và tải PDF/CSV.
 Lưu ý: màn hình chọn tên là phân quyền giao diện; nếu cần bảo mật chống người khác giả danh, cần bổ sung mật khẩu/Supabase Auth.
 
 Quy tắc chấm lại: cùng một BGK có thể chấm lại cùng đội ở ngày khác. Chỉ khóa khi trùng cả 3 yếu tố: ngày chấm + đội thi + BGK.

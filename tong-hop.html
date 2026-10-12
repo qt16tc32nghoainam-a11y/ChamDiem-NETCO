@@ -169,7 +169,8 @@ const JUDGES = [
   { id: 'mai-duc-lam', name: 'Ông Mai Đức Lâm' },
   { id: 'nguyen-thi-suong', name: 'Bà Nguyễn Thị Sương' },
   { id: 'ngo-thi-quynh-nhu', name: 'Bà Ngô Thị Quỳnh Như' },
-  { id: 'phan-hoang-trung-hieu', name: 'Ông Phan Hoàng Trung Hiếu' }
+  { id: 'phan-hoang-trung-hieu', name: 'Ông Phan Hoàng Trung Hiếu' },
+  { id: 'le-thi-tuong-van', name: 'Bà Lê Thị Tường Vân' }
 ];
 const KEY = 'chamdiem_submissions';
 
@@ -300,7 +301,7 @@ async function render(){
       <div class="group-card">
         <div class="group-head">
           <div class="group-title"><span class="badge-sm">${team.letter}</span>${team.name}</div>
-          <div class="group-count">${submittedCount}/4 BGK đã chấm · TB ${average}</div>
+          <div class="group-count">${submittedCount}/${JUDGES.length} BGK đã chấm · TB ${average}</div>
         </div>
         <div style="overflow-x:auto">
           <table class="group-table">
